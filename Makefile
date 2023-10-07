@@ -17,7 +17,7 @@ EXTRA_CFLAGS += -Wno-unused
 
 GCC_VER_49 := $(shell echo `$(CC) -dumpversion | cut -f1-2 -d.` \>= 4.9 | bc )
 
-SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ | sed -e s/ppc/powerpc/ | sed -e s/armv.l/arm/)
+SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ | sed -e /aarch64/arm/ | sed -e s/ppc/powerpc/ | sed -e s/armv.l/arm/)
 ARCH ?= $(SUBARCH)
 
 ifeq ($(GCC_VER_49),1)
