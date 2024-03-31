@@ -198,7 +198,7 @@ static void rtw_regd_override_dfs_state(struct wiphy *wiphy, struct get_chplan_r
 #endif /* CONFIG_RTW_CFG80211_CAC_EVENT */
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
-bool rtw_regd_is_wiphy_self_managed(struct wiphy *wiphy)
+static bool rtw_regd_is_wiphy_self_managed(struct wiphy *wiphy)
 {
 	return rtw_rfctl_is_disable_sw_channel_plan(wiphy_to_dvobj(wiphy))
 		|| !REGSTY_REGD_SRC_FROM_OS(dvobj_to_regsty(wiphy_to_dvobj(wiphy)));
@@ -368,7 +368,7 @@ static void rtw_regd_disable_no_20mhz_chs(struct wiphy *wiphy)
 	}
 }
 
-void rtw_update_wiphy_regd(struct wiphy *wiphy, struct get_chplan_resp *chplan, bool rtnl_lock_needed)
+static void rtw_update_wiphy_regd(struct wiphy *wiphy, struct get_chplan_resp *chplan, bool rtnl_lock_needed)
 {
 	struct ieee80211_regdomain *regd;
 	int ret;

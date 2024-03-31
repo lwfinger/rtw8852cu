@@ -246,17 +246,21 @@ u8 rtw_cfg80211_ch_switch_notify(_adapter *adapter, struct rtw_chan_def *rtw_chd
 		 *  called by others with block-tx.
 		 */
 
-		cfg80211_ch_switch_started_notify(adapter->pnetdev, &chdef,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
-		 0, 0, false, 0);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 0)
+                cfg80211_ch_switch_started_notify(adapter->pnetdev, &chdef, 0, 0, false);
 #else
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
-		 0,
-#endif
-		 0, false);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0))
+                cfg80211_ch_switch_started_notify(adapter->pnetdev, &chdef, 0, 0, false, 0);
+#else
+                cfg80211_ch_switch_started_notify(adapter->pnetdev, &chdef, 0, 0, false);
 #endif
 #else
-		cfg80211_ch_switch_started_notify(adapter->pnetdev, &chdef, 0);
+                cfg80211_ch_switch_started_notify(adapter->pnetdev, &chdef, 0, false);
+#endif
+#endif
+#else
+                cfg80211_ch_switch_started_notify(adapter->pnetdev, &chdef, 0);
 #endif
 		goto exit;
 	}
@@ -265,12 +269,18 @@ u8 rtw_cfg80211_ch_switch_notify(_adapter *adapter, struct rtw_chan_def *rtw_chd
 	if (!rtw_cfg80211_allow_ch_switch_notify(adapter))
 		goto exit;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
-	cfg80211_ch_switch_notify(adapter->pnetdev, &chdef, 0, 0);
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 2)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 2))
 	cfg80211_ch_switch_notify(adapter->pnetdev, &chdef, 0);
 #else
-	cfg80211_ch_switch_notify(adapter->pnetdev, &chdef);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 2))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0))
+        cfg80211_ch_switch_notify(adapter->pnetdev, &chdef, 0, 0);
+#else
+        cfg80211_ch_switch_notify(adapter->pnetdev, &chdef, 0);
+#endif
+#else
+        cfg80211_ch_switch_notify(adapter->pnetdev, &chdef);
+#endif
 #endif
 #else
 	int freq = rtw_bch2freq(rtw_chdef->band, rtw_chdef->chan);
@@ -5510,7 +5520,7 @@ const char *_nl80211_mesh_power_mode_str[] = {
 #define nl80211_mesh_power_mode_str(_p) ((_p <= NL80211_MESH_POWER_MAX) ? _nl80211_mesh_power_mode_str[_p] : _nl80211_mesh_power_mode_str[0])
 #endif
 
-void dump_station_parameters(void *sel, struct wiphy *wiphy, const struct station_parameters *params)
+static void dump_station_parameters(void *sel, struct wiphy *wiphy, const struct station_parameters *params)
 {
 #if DBG_RTW_CFG80211_STA_PARAM
 	if (params->supported_rates_len) {
@@ -6007,7 +6017,7 @@ exit:
 	return ret;
 }
 
-struct sta_info *rtw_sta_info_get_by_idx(struct sta_priv *pstapriv, const int idx, u8 *asoc_list_num)
+static struct sta_info *rtw_sta_info_get_by_idx(struct sta_priv *pstapriv, const int idx, u8 *asoc_list_num)
 {
 	_list	*phead, *plist;
 	struct sta_info *psta = NULL;
@@ -9938,7 +9948,7 @@ err:
 }
 
 #if !defined(CONFIG_REGD_SRC_FROM_OS) || (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 4, 0))
-void rtw_cfg80211_update_wiphy_max_txpower(_adapter *adapter, struct wiphy *wiphy)
+static void rtw_cfg80211_update_wiphy_max_txpower(_adapter *adapter, struct wiphy *wiphy)
 {
 	struct ieee80211_supported_band *band;
 	struct ieee80211_channel *channel;
@@ -10395,7 +10405,7 @@ int rtw_hostapd_acs_dump_survey(struct wiphy *wiphy, struct net_device *netdev, 
 
 #if defined(CPTCFG_VERSION) || (KERNEL_VERSION(4, 17, 0) <= LINUX_VERSION_CODE) \
     || defined(CONFIG_KERNEL_PATCH_EXTERNAL_AUTH)
-int cfg80211_rtw_external_auth(struct wiphy *wiphy, struct net_device *dev,
+static int cfg80211_rtw_external_auth(struct wiphy *wiphy, struct net_device *dev,
 	struct cfg80211_external_auth_params *params)
 {
 	_adapter *padapter = (_adapter *)rtw_netdev_priv(dev);
